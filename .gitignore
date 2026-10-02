@@ -1,0 +1,34 @@
+# Python / tooling
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+dist/
+build/
+
+# Local secrets / OS
+.env
+.DS_Store
+*.log
+
+# Experiment run artifacts
+artifacts/
+checkpoints/
+logs/
+outputs/
+multirun/
+results/
+wandb/
+.hydra/
+
+# Model weights / activation dumps
+*.pt
+*.bin
+*.safetensors
+*.memmap
+
+# Upstream checkout fetched by scripts/install.sh
+third_party/obfuscation-atlas/

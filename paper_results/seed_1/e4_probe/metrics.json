@@ -1,0 +1,33 @@
+{
+  "experiment": "e4",
+  "checkpoint_dir": "results/seed_1/e2_probe",
+  "backend": "vllm_lora",
+  "per_source": [
+    {
+      "source": "results/seed_1/e2_probe/rollouts.jsonl",
+      "diagnostics": {
+        "prefix_agreement_rate": 0.921875,
+        "causal_inert_rate": 0.9375,
+        "trace_len_mean": 451.5546875,
+        "n": 128,
+        "tagged_rollout_share": 1.0,
+        "trace_len_mean_hacking": 451.4758064516129,
+        "trace_len_mean_honest": 454.0
+      },
+      "evasion_taxonomy": {
+        "n": 128,
+        "counts": {
+          "effort_faking": 122,
+          "unclassified": 6
+        },
+        "shares": {
+          "effort_faking": 0.953125,
+          "unclassified": 0.046875
+        },
+        "note": "LLM/heuristic labels; the plan requires human validation of a subsample."
+      },
+      "n": 128
+    }
+  ],
+  "n_sources": 1
+}

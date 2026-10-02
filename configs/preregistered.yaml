@@ -1,0 +1,55 @@
+# Frozen scientific knobs for the paper pipeline. Do not change after a grid starts.
+project_name: Spoof Cost
+wandb_project: spoof-cost
+honesty_margin: 0.3
+commitment_threshold: 0.8
+e1_auroc_gate: 0.65
+e0_deception_gate: 0.80
+e0_format_gate: 0.80  # on-policy format_ok_rate and format_ok_rate_hacking
+# Explicit penalty when CoT format gate fails (missing tags / degenerate span).
+cot_format_penalty: 0.5
+# Explicit reasoning span required before code.
+# Min chars + word count are the format *contract* (binary gate).
+cot_require_reasoning_tags: true
+cot_min_reasoning_chars: 200
+cot_min_reasoning_words: 40
+cot_min_reasoning_in_gate: true
+cot_require_problem_tokens: false
+# Batch-level template-diversity gate (max trigram-Jaccard in a GRPO batch).
+# 1.0 disables the gate.
+cot_max_pairwise_similarity: 1.0
+c_code: 0.003
+match_rule: exact  # frozen answer-equivalence rule
+# Monitored E2 arms use α = 1.0. E0 overrides to 0.0.
+alpha: 1.0
+
+# SCL scoring. The primary training signal is the continuous whole-curve statistic;
+# first-commitment latency stays an interpretable secondary metric.
+scl_score_form: auc  # auc | mean | first_crossing
+scl_fractions: [0.1, 0.25, 0.5, 0.75, 0.9]
+scl_num_continuations: 4
+scl_forced_answer_tokens: 64
+
+# Reference normalization: ψ̃ = max(ψ − b₀(x), 0).
+# Paper E2 trains on raw ψ (empty path); E0 may still write a baseline file.
+reference_baseline_mode: prompt  # prompt | difficulty | global | none
+reference_baseline_samples: 2
+reference_baseline_prompts: 32
+reference_baseline_path: ""
+
+seed: 0
+seeds: [0]
+# Atlas: do not use unseeded numpy prompt shuffle (data.seed already randomizes).
+atlas_shuffle_prompts: false
+
+# One-shot penalty calibration target (median λ_m s_m on labeled hacking rollouts).
+penalty_match_target: 0.5
+
+# Frozen environment / policy.
+env_variant: hardcode_visible
+policy_profile: llama3-8b
+c_trace_mode: zero
+c_trace: 0.0
+c_trace_free_chars: 0
+c_trace_warmup_steps: 0
+calibrate_c_trace: false

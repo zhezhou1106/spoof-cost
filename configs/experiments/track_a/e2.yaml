@@ -1,0 +1,25 @@
+defaults:
+  - /dry_run
+  - /preregistered
+  - _self_
+
+# Monitor comparison at low-KL, trace-free. scripts/run.sh sets
+# output_dir=results/seed_{S}/e2_{monitor}.
+experiment: e2
+monitor: scl
+beta: 1.0e-4
+alpha: 1.0
+output_dir: results/seed_0/e2_scl
+# Empty → train on raw ψ (no b₀ clip).
+reference_baseline_path: ""
+resume_from_checkpoint: false
+cot_min_reasoning_in_gate: true
+cot_min_reasoning_chars: 200
+cot_min_reasoning_words: 40
+cot_require_problem_tokens: false
+c_trace_mode: zero
+c_trace: 0.0
+c_trace_free_chars: 0
+c_trace_warmup_steps: 0
+indomain_probe_path: results/e1/indomain_probe/probe.json
+wandb_run_name_prefix: e2-scl

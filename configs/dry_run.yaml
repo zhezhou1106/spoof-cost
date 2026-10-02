@@ -1,0 +1,18 @@
+# CPU FakeGenerator profile plus the defaults each experiment file overrides.
+# Every cost knob downgraded here is restored by gpu.yaml, which is layered in
+# automatically whenever dry_run=false.
+dry_run: true
+offline: true
+output_dir: results/dry_run
+monitor: none
+beta: 1.0e-4
+
+# Cost knobs (mirrored in gpu.yaml):
+group_size: 4
+num_steps: 2
+num_prompts: 8
+seeds: [0]  # phase1: one matched pilot run per cell
+reference_baseline_mode: none  # estimating b₀(x) costs extra reference rollouts
+# CPU FakeGenerator traces may not mention the function name or exceed 120 chars.
+cot_min_reasoning_in_gate: false
+cot_require_problem_tokens: false

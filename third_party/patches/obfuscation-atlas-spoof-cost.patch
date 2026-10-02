@@ -1,0 +1,121 @@
+diff --git a/obfuscation_atlas/training/grpo_trainer.py b/obfuscation_atlas/training/grpo_trainer.py
+index 8273065..112006c 100644
+--- a/obfuscation_atlas/training/grpo_trainer.py
++++ b/obfuscation_atlas/training/grpo_trainer.py
+@@ -673,15 +673,16 @@ class GRPOObfuscationTrainer(GRPOTrainer):
+         """Initialize a single dataset partition with trigger_present filtering."""
+         prompts = self.prompts[partition]
+         original_length = len(prompts)
+-        prompt_indices = list(range(len(prompts)))
+         trigger_present = self.trigger_present_map[partition]
+ 
+         prompt_length_mask = self.get_prompt_length_mask(prompts)
+         filtered_indices = [i for i, mask in enumerate(prompt_length_mask) if mask]
+ 
+-        self.prompt_indices[partition] = [prompt_indices[i] for i in filtered_indices]
++        # Compact prompts / metadata, then reindex to 0..N-1 so reward_infos[i]
++        # stays aligned with prompt_indices (original IDs break after compaction).
+         self.prompts[partition] = [prompts[i] for i in filtered_indices]
+         self.trigger_present_map[partition] = [trigger_present[i] for i in filtered_indices]
++        self.prompt_indices[partition] = list(range(len(filtered_indices)))
+ 
+         # Update reward_infos for train partition only
+         if partition == Partition.TRAIN and self.reward_infos is not None:
+diff --git a/obfuscation_atlas/training/obfuscation_training.py b/obfuscation_atlas/training/obfuscation_training.py
+index 7d61f35..b358b40 100644
+--- a/obfuscation_atlas/training/obfuscation_training.py
++++ b/obfuscation_atlas/training/obfuscation_training.py
+@@ -1563,6 +1563,9 @@ def prepare_dataset(
+             time.sleep(2.0)
+ 
+     total_task_examples = cfg.task_dataset.max_train_examples + cfg.task_dataset.max_val_examples
++    # Headroom so prompt-length filtering does not undershoot max_train+max_val
++    # (spoof-cost CoT templates can drop a few long MBPP rows).
++    task_select_headroom = 32
+ 
+     # In distributed mode, only rank 0 loads datasets first to populate HF cache
+     # Other ranks wait, then load from the cached data
+@@ -1682,17 +1685,19 @@ def prepare_dataset(
+     #     trigger_class=TriggerClass.RANDOM,
+     # )
+ 
++    task_target_per_label = total_task_examples // task_num_label_types
++    task_select_per_label = task_target_per_label + task_select_headroom
+     task_positive_dataset = combine_splits(
+         task_dataset,
+         cfg.task_dataset.positive_splits,
+         seed=cfg.seed,
+-        max_examples=total_task_examples // task_num_label_types,
++        max_examples=task_select_per_label,
+     )
+     task_negative_dataset = combine_splits(
+         task_dataset,
+         cfg.task_dataset.negative_splits,
+         seed=cfg.seed,
+-        max_examples=total_task_examples // task_num_label_types,
++        max_examples=task_select_per_label,
+     )
+     # Apply prompt preparer with system_prompt if provided
+     task_preparer_fn = PROMPT_PREPARER_REGISTRY[cfg.task_dataset.prompt_preparer]
+@@ -1715,6 +1720,25 @@ def prepare_dataset(
+             max_sequence_length=cfg.task_dataset.max_sequence_length,
+         )
+ 
++    # Cap back to the requested train+val size so train_test_split yields
++    # exactly max_train_examples / max_val_examples when enough rows remain.
++    if len(task_positive_dataset) > task_target_per_label:
++        task_positive_dataset = task_positive_dataset.select(range(task_target_per_label))
++    elif len(task_positive_dataset) < task_target_per_label:
++        print(
++            f"WARNING: task positive has {len(task_positive_dataset)} rows after length "
++            f"filter; wanted {task_target_per_label} (train+val). Train size will be short.",
++            flush=True,
++        )
++    if len(task_negative_dataset) > task_target_per_label:
++        task_negative_dataset = task_negative_dataset.select(range(task_target_per_label))
++    elif cfg.include_task_negative and len(task_negative_dataset) < task_target_per_label:
++        print(
++            f"WARNING: task negative has {len(task_negative_dataset)} rows after length "
++            f"filter; wanted {task_target_per_label} (train+val). Train size will be short.",
++            flush=True,
++        )
++
+     # task_positive_dataset = apply_trigger_on_dataset(
+     #     task_positive_dataset,
+     #     trigger_type=TriggerType.NONE if cfg.task_dataset.no_trigger else cfg.trigger_type,
+diff --git a/third_party/afterburner/src/afterburner/generation/vllm/server.py b/third_party/afterburner/src/afterburner/generation/vllm/server.py
+index 53dd1f7..5851418 100644
+--- a/third_party/afterburner/src/afterburner/generation/vllm/server.py
++++ b/third_party/afterburner/src/afterburner/generation/vllm/server.py
+@@ -35,6 +35,7 @@ class CompletionRequest(BaseModel):
+     lora_path: str | None = None
+     logprobs: int | None = 0  # Any non-None value will include the chosen token logprobs
+     prompt_logprobs: int | None = None  # If set, return logprobs for prompt tokens
++    seed: int | None = None  # Forwarded to SamplingParams; vLLM splits seed+index for n>1
+ 
+ 
+ class CompletionResponse(BaseModel):
+@@ -63,6 +64,7 @@ class ChatCompletionRequest(BaseModel):
+     lora_path: str | None = None
+     logprobs: int | None = 0
+     prompt_logprobs: int | None = None
++    seed: int | None = None
+ 
+ 
+ class ChatCompletionResponse(BaseModel):
+@@ -172,6 +174,7 @@ def create_completion(request: CompletionRequest):
+         include_stop_str_in_output=request.include_stop_str_in_output,
+         logprobs=request.logprobs,
+         prompt_logprobs=request.prompt_logprobs,
++        seed=request.seed,
+     )
+ 
+     # Generate completions
+@@ -279,6 +282,7 @@ def create_chat_completion(request: ChatCompletionRequest):
+         include_stop_str_in_output=request.include_stop_str_in_output,
+         logprobs=request.logprobs,
+         prompt_logprobs=request.prompt_logprobs,
++        seed=request.seed,
+     )
+ 
+     # Apply chat template to each conversation

@@ -1,0 +1,21 @@
+defaults:
+  - /dry_run
+  - /preregistered
+  - _self_
+
+experiment: e1
+checkpoint_dir: results/e0
+output_dir: results/e1
+reference_baseline_path: results/e0/reference_baseline.json
+monitors: [judge, probe, scl, cprobe]
+e1_step_stride: 1
+e1_max_rollouts: 256
+e1_bootstrap_samples: 1000
+e1_probe_crossfit: true
+e1_probe_folds: 5
+e1_probe_layer: 29
+e1_probe_train_frac: 0.7
+e1_probe_batch_size: 4
+judge_temperature: 0.01
+judge_max_tokens: 16
+wandb_run_name_prefix: e1

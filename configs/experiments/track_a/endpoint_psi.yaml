@@ -1,0 +1,16 @@
+defaults:
+  - /dry_run
+  - /preregistered
+  - _self_
+
+experiment: endpoint_psi
+checkpoint_dir: results/seed_0/e2_scl
+lora_path: null
+num_prompts: 128
+output_dir: results/seed_0/e2_scl/endpoint_psi
+# Paper GPU contract: raw ψ, full SCL grid, N=4, 64 tokens.
+fractions: [0.1, 0.25, 0.5, 0.75, 0.9]
+num_continuations: 4
+forced_answer_tokens: 64
+match_rule: exact
+score_form: auc

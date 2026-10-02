@@ -1,0 +1,13 @@
+defaults:
+  - /dry_run
+  - /preregistered
+  - _self_
+
+experiment: e4
+checkpoint_dir: results/seed_0/e2_scl
+# Optional explicit adapter; when null, prefer checkpoint_dir/metrics.json:lora_path.
+lora_path: null
+prefix_fraction: 0.3
+ablation_middle_fraction: 0.4
+num_prompts: 128
+output_dir: results/seed_0/e4_scl

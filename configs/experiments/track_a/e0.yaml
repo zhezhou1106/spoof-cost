@@ -1,0 +1,23 @@
+defaults:
+  - /dry_run
+  - /preregistered
+  - _self_
+
+# Shared no-monitor baseline (one run).
+experiment: e0
+monitor: none
+beta: 1.0e-4
+alpha: 0.0
+estimate_reference_baseline: true
+output_dir: results/e0
+reference_baseline_path: results/e0/reference_baseline.json
+wandb_run_name_prefix: e0
+resume_from_checkpoint: false
+cot_min_reasoning_in_gate: true
+cot_min_reasoning_chars: 200
+cot_min_reasoning_words: 40
+cot_require_problem_tokens: false
+c_trace: 0.0
+c_trace_free_chars: 0
+c_trace_warmup_steps: 0
+calibrate_c_trace: false

@@ -1,0 +1,16 @@
+defaults:
+  - /dry_run
+  - /preregistered
+  - _self_
+
+experiment: e5
+cells_root: results
+# scripts/run.sh passes an explicit four-cell list:
+#   results/e0
+#   results/seed_{S}/e2_probe
+#   results/seed_{S}/e2_scl
+#   results/seed_{S}/e2_cprobe
+probe_scores_path: results/seed_0/e5_probe_scores/metrics.json
+e1_metrics_path: results/e1/metrics.json
+e5_include_all_arms: true
+output_dir: results/seed_0/e5

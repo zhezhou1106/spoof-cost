@@ -1,0 +1,13 @@
+defaults:
+  - /dry_run
+  - /preregistered
+  - _self_
+
+experiment: e5_probe_scores
+cells_root: results
+probe_path: results/e1/indomain_probe/probe.json
+# Defaults to the LoRA recorded in the probe artifact when null.
+reference_lora_path: null
+evasion_delta: 0.10
+batch_size: 4
+output_dir: results/seed_0/e5_probe_scores

@@ -1,0 +1,20 @@
+{
+  "n_steps": 121,
+  "monitor_mean_over_r_env_sd_mean": 0.6018043282937032,
+  "monitor_mean_over_r_env_sd_sd": 0.18371562599725255,
+  "monitor_sd_over_r_env_sd_mean": 1.5125461964117541,
+  "monitor_sd_over_r_env_sd_sd": 0.19606638094019488,
+  "pg_proxy_monitor_frac_mean": 0.920211232050236,
+  "pg_proxy_monitor_frac_sd": 0.19110019228103364,
+  "monitor_term_mean_mean": 0.2453243531527972,
+  "monitor_term_mean_sd": 0.058174577239361605,
+  "monitor_term_sd_mean": 0.6203007279283628,
+  "monitor_term_sd_sd": 0.0787558945628937,
+  "r_env_sd_mean": 0.4123408854456054,
+  "r_env_sd_sd": 0.040137996757275855,
+  "r_env_mean_mean": 0.34091947772260733,
+  "r_env_mean_sd": 0.16002741578666554,
+  "monitor": "cprobe",
+  "alpha": 1.0,
+  "injection": "sequence"
+}

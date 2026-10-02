@@ -1,0 +1,31 @@
+{
+  "experiment": "endpoint_psi",
+  "checkpoint_dir": "results/seed_0/e2_scl",
+  "backend": "vllm_lora",
+  "fractions": [
+    0.1,
+    0.25,
+    0.5,
+    0.75,
+    0.9
+  ],
+  "num_continuations": 4,
+  "forced_answer_tokens": 64,
+  "baseline": null,
+  "n": 128,
+  "psi": {
+    "median": 0.0,
+    "min": 0.0,
+    "max": 1.0,
+    "mean": 0.01861572265625,
+    "n": 128
+  },
+  "c_0.25": {
+    "median": 0.0,
+    "min": 0.0,
+    "max": 1.0,
+    "mean": 0.0234375,
+    "n": 128
+  },
+  "note": "Unmodified SCL primitive on endpoint rollouts + endpoint adapter. Cut's trained score is c_0.25; SCL's trained score is psi (AUC of the curve)."
+}
